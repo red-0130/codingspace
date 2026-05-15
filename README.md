@@ -9,7 +9,7 @@ This image is built on `node:lts-trixie-slim` using a **multi-stage build** proc
 ### Core Runtimes & Languages
 
 - **Node.js LTS**: The backbone of the environment.
-- **Bun (v1.3.13)**: A fast all-in-one JavaScript runtime.
+- **Bun (latest)**: A fast all-in-one JavaScript runtime.
 - **Python 3**: Pre-installed with `python3-venv`, `pip`, `pipx`, and `python3-minimal`.
 
 ### Development & Terminal Tools
@@ -21,6 +21,7 @@ This image is built on `node:lts-trixie-slim` using a **multi-stage build** proc
 - **Ripgrep (15.1.0)**: Line-oriented search tool that recursively searches the current directory.
 - **Fd (10.4.2)**: A simple, fast and user-friendly alternative to 'find'.
 - **FZF (latest)**: A general-purpose command-line fuzzy finder.
+- **Tree-sitter CLI (0.22.6)**: Incremental parsing system for programming tools.
 - **Build Essentials**: Includes `make`, `gcc`, etc.
 - **OpenSSH Client**: For secure remote connections.
 
@@ -47,6 +48,7 @@ docker build \
   --build-arg NV_VERSION=0.10.0 \
   --build-arg ZJ_VERSION=0.40.0 \
   --build-arg LG_VERSION=0.40.0 \
+  --build-arg TS_VERSION=0.22.6 \
   -t codingspace .
 ```
 
