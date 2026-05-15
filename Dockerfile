@@ -59,6 +59,7 @@ RUN curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${TS_
 FROM node:lts-trixie-slim
 
 ENV TZ=America/Toronto
+ENV CONTAINER=true
 ARG USER=coder
 
 # Dependencies for LazyVim, SSH, and Pip
