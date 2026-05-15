@@ -5,6 +5,7 @@ ARG LG_VERSION=0.61.1
 ARG RG_VERSION=15.1.0
 ARG FD_VERSION=10.4.2
 ARG SF_VERSION=1.5.0
+ARG TS_VERSION=0.22.6
 
 # --- Stage 1: Builder ---
 FROM debian:trixie-slim AS builder
@@ -15,6 +16,7 @@ ARG LG_VERSION
 ARG RG_VERSION
 ARG FD_VERSION
 ARG SF_VERSION
+ARG TS_VERSION
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -23,7 +25,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /extract/nv /extract/zj /extract/lg /extract/sf /extract/fzf_bin
+RUN mkdir -p /extract/nv /extract/zj /extract/lg /extract/sf /extract/fzf_bin /extract/ts
 
 # 1. Neovim
 RUN NV_DL_URL=$(if [ "$NV_VERSION" = "latest" ]; then echo "latest/download"; else echo "download/v$NV_VERSION"; fi) && \
@@ -48,6 +50,11 @@ RUN git clone --depth 1 https://github.com/junegunn/fzf.git /tmp/fzf && \
 RUN curl -L -o /extract/rg.deb "https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep_${RG_VERSION}-1_amd64.deb" && \
     curl -L -o /extract/fd.deb "https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd_${FD_VERSION}_amd64.deb"
 
+# 7. Tree-sitter CLI
+RUN curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${TS_VERSION}/tree-sitter-linux-x64.gz" | \
+    gunzip > /extract/ts/tree-sitter && \
+    chmod +x /extract/ts/tree-sitter
+
 # --- Stage 2: Final ---
 FROM node:lts-trixie-slim
 
@@ -69,6 +76,7 @@ COPY --from=builder /extract/zj/zellij /usr/local/bin/
 COPY --from=builder /extract/lg/lazygit /usr/local/bin/
 COPY --from=builder /extract/sf/dist/*/spf /usr/local/bin/spf
 COPY --from=builder /extract/fzf_bin/fzf /usr/local/bin/
+COPY --from=builder /extract/ts/tree-sitter /usr/local/bin/
 
 # Install .debs and Bun
 COPY --from=builder /extract/rg.deb /extract/fd.deb /tmp/
