@@ -64,7 +64,7 @@ ARG USER=coder
 
 # Dependencies for LazyVim, SSH, and Pip
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    sudo curl wget git python3-minimal python3-pip pipx python3-venv \
+    sudo curl wget procps git python3-minimal python3-pip pipx python3-venv \
     ca-certificates unzip openssh-client build-essential make gettext \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
