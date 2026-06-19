@@ -1,0 +1,66 @@
+name: Build and Publish Image
+
+on:
+  push:
+    branches: ["main"]
+  schecdule:
+    # Runs every Thursday @ 2:00
+    - cron: "0 2 * * 4"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: actions/docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: actions/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest
+
+      - name: Build Docker image
+        uses: actions/docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Test core tools
+        run: |
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} node -v
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} npm -v
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} bun -v
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} python3 --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} pip3 --version
+
+      - name: Test Neovim specific tools
+        run: |
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} nvim --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} tree-sitter --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} fd --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} rg --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} lazygit --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} zellij --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} fzf --version
+
+      # 5. Push the already-built layers to GHCR (Fast!)
+      - name: Push Docker image
+        run: |
+          echo "${{ steps.meta.outputs.tags }}" | xargs -I {} docker push {}
