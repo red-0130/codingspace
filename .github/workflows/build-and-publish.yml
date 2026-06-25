@@ -3,7 +3,7 @@ name: Build and Publish Image
 on:
   push:
     branches: ["main"]
-  schecdule:
+  schedule:
     # Runs every Thursday @ 2:00
     - cron: "0 2 * * 4"
 
