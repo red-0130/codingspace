@@ -205,7 +205,7 @@ module "vscode-web" {
   count          = data.coder_workspace.me.start_count
   source         = "registry.coder.com/coder/vscode-web/coder"
   version        = "1.6.0"
-  agent_id       = coder_agent.example.id
+  agent_id       = coder_agent.main.id
   accept_license = true
   disable_trust  = true
   use_cached     = true
