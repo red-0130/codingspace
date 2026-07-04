@@ -1,7 +1,7 @@
 # --- Version Configuration ---
 ARG NV_VERSION=latest
 ARG ZJ_VERSION=latest
-ARG LG_VERSION=0.61.1
+ARG LG_VERSION=0.63.0
 ARG RG_VERSION=15.1.0
 ARG FD_VERSION=10.4.2
 ARG SF_VERSION=1.5.0
@@ -87,11 +87,13 @@ RUN dpkg -i /tmp/rg.deb /tmp/fd.deb && rm /tmp/*.deb && \
     ln -s /usr/local/bin/bun /usr/local/bin/bunx
 
 # Setup User
-RUN useradd ${USER} --groups sudo --create-home --shell /bin/bash && \
+RUN groupmod -n ${USER} node && \
+    usermod -l ${USER} -d /home/${USER} -m node && \
     echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} && \
     chmod 0440 /etc/sudoers.d/${USER}
 
 USER ${USER}
+
 WORKDIR /home/${USER}
 
 # Config: SSH & FZF (Modern eval method)
