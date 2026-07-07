@@ -16,14 +16,29 @@ This image is built on `node:lts-trixie-slim` using a **multi-stage build** proc
 
 - **Neovim (latest)**: Hyperextensible Vim-based text editor.
 - **Zellij (latest)**: A modern terminal workspace/multiplexer.
-- **Lazygit (0.61.1)**: Simple terminal UI for git commands.
-- **Superfile (1.5.0)**: A pretty and fancy terminal file manager.
+- **Lazygit (0.63.0)**: Simple terminal UI for git commands.
+- **Superfile (1.6.0)**: A pretty and fancy terminal file manager.
 - **Ripgrep (15.1.0)**: Line-oriented search tool that recursively searches the current directory.
 - **Fd (10.4.2)**: A simple, fast and user-friendly alternative to 'find'.
 - **FZF (latest)**: A general-purpose command-line fuzzy finder.
-- **Tree-sitter CLI (0.22.6)**: Incremental parsing system for programming tools.
+- **Tree-sitter CLI (0.26.10)**: Incremental parsing system for programming tools.
 - **Build Essentials**: Includes `make`, `gcc`, etc.
 - **OpenSSH Client**: For secure remote connections.
+
+## Deployment Options
+
+### Devcontainer / DevPod
+
+This repository includes a `devcontainer.json` configuration, allowing you to easily spin up the environment using [DevPod](https://devpod.sh/) or other devcontainer clients:
+
+- **Image**: `ghcr.io/red-0130/codingspace:latest`
+
+### Coder Workspace
+
+A pre-configured Coder template (`main.tf`) is provided for deploying workspaces as Docker containers. It includes:
+- **VS Code Web**: Access your editor directly in the browser.
+- **Dotfiles**: Automated personal configurations loading from a git repository.
+- **Resource Monitoring**: Real-time CPU, RAM, and disk utilization stats.
 
 ## Getting Started
 
@@ -47,8 +62,8 @@ You can specify custom versions for tools using build arguments:
 docker build \
   --build-arg NV_VERSION=0.10.0 \
   --build-arg ZJ_VERSION=0.40.0 \
-  --build-arg LG_VERSION=0.40.0 \
-  --build-arg TS_VERSION=0.22.6 \
+  --build-arg LG_VERSION=0.63.0 \
+  --build-arg TS_VERSION=0.26.10 \
   -t codingspace .
 ```
 
