@@ -191,32 +191,3 @@ resource "docker_container" "workspace" {
     value = data.coder_workspace.me.name
   }
 }
-
-module "dotfiles" {
-  count                   = data.coder_workspace.me.start_count
-  source                  = "registry.coder.com/modules/dotfiles/coder"
-  version                 = ">=1.0.29"
-  agent_id                = coder_agent.main.id
-  default_dotfiles_uri    = "git@github.com:red-0130/dotfiles.git"
-  default_dotfiles_branch = "main"
-}
-
-module "vscode-web" {
-  count          = data.coder_workspace.me.start_count
-  source         = "registry.coder.com/coder/vscode-web/coder"
-  version        = "1.6.0"
-  agent_id       = coder_agent.main.id
-  accept_license = true
-  disable_trust  = true
-  use_cached     = true
-  settings       = {
-    "chat.disableAIFeatures" = true
-  }
-}
-
-module "coder-login" {
-  count    = data.coder_workspace.me.start_count
-  source   = "registry.coder.com/coder/coder-login/coder"
-  version  = "1.1.1"
-  agent_id = coder_agent.main.id
-}
