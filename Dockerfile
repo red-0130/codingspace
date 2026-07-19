@@ -6,6 +6,7 @@ ARG RG_VERSION=15.2.0
 ARG FD_VERSION=10.4.2
 ARG SF_VERSION=1.6.0
 ARG TS_VERSION=0.26.10
+ARG UV_VERSION=latest
 
 # --- Stage 1: Builder ---
 FROM debian:trixie-slim AS builder
@@ -17,12 +18,14 @@ ARG RG_VERSION
 ARG FD_VERSION
 ARG SF_VERSION
 ARG TS_VERSION
+ARG UV_VERSION
 
 RUN apt-get update && apt-get install -y \
     curl \
     tar \
     git \
     ca-certificates \
+    upx-ucl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /extract/nv /extract/zj /extract/lg /extract/sf /extract/fzf_bin /extract/ts
@@ -55,6 +58,10 @@ RUN curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${TS_
     gunzip > /extract/ts/tree-sitter && \
     chmod +x /extract/ts/tree-sitter
 
+# 8. UV (Copy & Compress)
+COPY --from=ghcr.io/astral-sh/uv:${UV_VERSION} /uv /uvx /extract/
+RUN upx --best --lzma /extract/uv /extract/uvx
+
 # --- Stage 2: Final ---
 FROM node:lts-trixie-slim
 
@@ -62,9 +69,9 @@ ENV TZ=America/Toronto
 ENV CONTAINER=true
 ARG USER=coder
 
-# Dependencies for LazyVim, SSH, and Pip
+# Dependencies for LazyVim, SSH, and Python
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    sudo curl wget procps git python3-minimal python3-pip python3-venv \
+    sudo curl wget procps git python3-minimal \
     ca-certificates unzip openssh-client build-essential make gettext \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
@@ -78,6 +85,7 @@ COPY --from=builder /extract/lg/lazygit /usr/local/bin/
 COPY --from=builder /extract/sf/dist/*/spf /usr/local/bin/spf
 COPY --from=builder /extract/fzf_bin/fzf /usr/local/bin/
 COPY --from=builder /extract/ts/tree-sitter /usr/local/bin/
+COPY --from=builder /extract/uv /extract/uvx /usr/local/bin/
 
 # Install .debs and Bun
 COPY --from=builder /extract/rg.deb /extract/fd.deb /tmp/

@@ -10,7 +10,7 @@ This image is built on `node:lts-trixie-slim` using a **multi-stage build** proc
 
 - **Node.js LTS**: The backbone of the environment.
 - **Bun (latest)**: A fast all-in-one JavaScript runtime.
-- **Python 3**: Pre-installed with `python3-venv`, `pip`, `pipx`, and `python3-minimal`.
+- **Python 3**: Pre-installed with `python3-minimal` and `uv` (a fast Python package installer and resolver).
 
 ### Development & Terminal Tools
 

@@ -50,7 +50,8 @@ jobs:
           docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} npm -v
           docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} bun -v
           docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} python3 --version
-          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} pip3 --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} uv --version
+          docker run --rm ghcr.io/${{ github.repository }}:sha-${{ github.sha }} uvx --version
 
       - name: Test Neovim specific tools
         run: |
