@@ -58,9 +58,17 @@ RUN curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${TS_
     gunzip > /extract/ts/tree-sitter && \
     chmod +x /extract/ts/tree-sitter
 
-# 8. UV (Copy & Compress)
+# 8. Copy UV and compress all downloaded tools with UPX
 COPY --from=ghcr.io/astral-sh/uv:${UV_VERSION} /uv /uvx /extract/
-RUN upx --best --lzma /extract/uv /extract/uvx
+RUN upx --best --lzma \
+    /extract/nv/bin/nvim \
+    /extract/zj/zellij \
+    /extract/lg/lazygit \
+    /extract/sf/dist/*/spf \
+    /extract/fzf_bin/fzf \
+    /extract/ts/tree-sitter \
+    /extract/uv \
+    /extract/uvx
 
 # --- Stage 2: Final ---
 FROM node:lts-trixie-slim
