@@ -8,6 +8,8 @@ ARG SF_VERSION=1.6.0
 ARG TS_VERSION=0.26.10
 ARG UV_VERSION=latest
 
+FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv-stage
+
 # --- Stage 1: Builder ---
 FROM debian:trixie-slim AS builder
 
@@ -59,7 +61,7 @@ RUN curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${TS_
     chmod +x /extract/ts/tree-sitter
 
 # 8. Copy UV and compress all downloaded tools with UPX
-COPY --from=ghcr.io/astral-sh/uv:${UV_VERSION} /uv /uvx /extract/
+COPY --from=uv-stage /uv /uvx /extract/
 RUN upx --best --lzma \
     /extract/nv/bin/nvim \
     /extract/zj/zellij \
