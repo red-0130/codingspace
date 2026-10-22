@@ -147,7 +147,7 @@ resource "docker_volume" "home_volume" {
   }
 }
 
-data "docker_registry_image" "mini" {
+data "docker_registry_image" "main" {
   name = "ghcr.io/red-0130/codingspace:mini"
 }
 
