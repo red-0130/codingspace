@@ -15,6 +15,7 @@ module "code-server" {
   agent_id       = coder_agent.main.id
   install_prefix = "/home/coder/.local/code-server"
   use_cached     = true
+  folder         = "/workspaces"
   extensions = [
     "usernamehw.errorlens",
     "esbenp.prettier-vscode",

@@ -40,6 +40,9 @@ resource "coder_agent" "main" {
       touch ~/.init_done
     fi
 
+    # Ensure /workspaces is owned by the user
+    sudo chown -R $(id -u):$(id -g) /workspaces
+
     # Add any commands that should be executed at workspace startup (e.g install requirements, start a program, etc) here
   EOT
 
@@ -47,7 +50,9 @@ resource "coder_agent" "main" {
   # workspace. Note that they take precedence over configuration defined in ~/.gitconfig!
   # You can remove this block if you'd prefer to configure Git manually or using
   # dotfiles. (see docs/dotfiles.md)
-  env = {}
+  env = {
+    TERM = "xterm-256color"
+  }
 
   # The following metadata blocks are optional. They are used to display
   # information about your workspace in the dashboard. You can remove them
@@ -79,8 +84,16 @@ resource "coder_agent" "main" {
   }
 
   metadata {
+    display_name = "Workspaces Disk"
+    key          = "4_workspaces_disk"
+    script       = "coder stat disk --path /workspaces"
+    interval     = 60
+    timeout      = 1
+  }
+
+  metadata {
     display_name = "CPU Usage (Host)"
-    key          = "4_cpu_usage_host"
+    key          = "5_cpu_usage_host"
     script       = "coder stat cpu --host"
     interval     = 10
     timeout      = 1
@@ -88,7 +101,7 @@ resource "coder_agent" "main" {
 
   metadata {
     display_name = "Memory Usage (Host)"
-    key          = "5_mem_usage_host"
+    key          = "6_mem_usage_host"
     script       = "coder stat mem --host"
     interval     = 10
     timeout      = 1
@@ -96,7 +109,7 @@ resource "coder_agent" "main" {
 
   metadata {
     display_name = "Load Average (Host)"
-    key          = "6_load_host"
+    key          = "7_load_host"
     # get load avg scaled by number of cores
     script   = <<EOT
       echo "`cat /proc/loadavg | awk '{ print $1 }'` `nproc`" | awk '{ printf "%0.2f", $1/$2 }'
@@ -109,6 +122,33 @@ resource "coder_agent" "main" {
 
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.id}-home"
+  # Protect the volume from being deleted due to changes in attributes.
+  lifecycle {
+    ignore_changes = all
+  }
+  # Add labels in Docker to keep track of orphan resources.
+  labels {
+    label = "coder.owner"
+    value = data.coder_workspace_owner.me.name
+  }
+  labels {
+    label = "coder.owner_id"
+    value = data.coder_workspace_owner.me.id
+  }
+  labels {
+    label = "coder.workspace_id"
+    value = data.coder_workspace.me.id
+  }
+  # This field becomes outdated if the workspace is renamed but can
+  # be useful for debugging or cleaning out dangling volumes.
+  labels {
+    label = "coder.workspace_name_at_creation"
+    value = data.coder_workspace.me.name
+  }
+}
+
+resource "docker_volume" "workspaces_volume" {
+  name = "coder-${data.coder_workspace.me.id}-workspaces"
   # Protect the volume from being deleted due to changes in attributes.
   lifecycle {
     ignore_changes = all
@@ -170,6 +210,11 @@ resource "docker_container" "workspace" {
   volumes {
     container_path = "/home/coder"
     volume_name    = docker_volume.home_volume.name
+    read_only      = false
+  }
+  volumes {
+    container_path = "/workspaces"
+    volume_name    = docker_volume.workspaces_volume.name
     read_only      = false
   }
 
