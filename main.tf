@@ -31,6 +31,7 @@ data "coder_workspace_owner" "me" {}
 resource "coder_agent" "main" {
   arch           = data.coder_provisioner.me.arch
   os             = "linux"
+  dir            = "/workspaces"
   startup_script = <<-EOT
     set -e
 
